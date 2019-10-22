@@ -18,7 +18,8 @@ from torch.utils.cpp_extension import CUDA_HOME
 try:
     import torch_test_cpp_extension.cpp as cpp_extension
     import torch_test_cpp_extension.msnpu as msnpu_extension
-except ImportError:
+except ImportError as e:
+    print(e)
     warnings.warn(
         "test_cpp_extensions.py cannot be invoked directly. Run "
         "`python run_test.py -i cpp_extensions` instead."

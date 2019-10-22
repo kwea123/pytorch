@@ -74,7 +74,7 @@ else:
             import torch._dl as _dl_flags
 
     old_flags = sys.getdlopenflags()
-    sys.setdlopenflags(_dl_flags.RTLD_GLOBAL | _dl_flags.RTLD_LAZY)
+    sys.setdlopenflags(_dl_flags.RTLD_LAZY)
 
 del _dl_flags
 
