@@ -364,7 +364,7 @@ struct TORCH_API Variable::AutogradMeta : public c10::AutogradMetaInterface {
   std::weak_ptr<Node> grad_accumulator_;
 
   std::vector<std::shared_ptr<FunctionPreHook>> hooks_;
-  std::shared_ptr<hooks_list> cpp_hooks_list;
+  std::shared_ptr<CppHooksList> cpp_hooks_list_;
 
   // Only meaningful on leaf variables (must be false otherwise)
   bool requires_grad_;
@@ -704,15 +704,15 @@ template <typename T>
 auto Variable::register_hook(T&& hook) -> Variable::hook_return_void_t<T> {
   TORCH_CHECK(requires_grad(), "cannot register a hook on a variable that "
                            "doesn't require gradient");
-  auto &list = get_autograd_meta()->cpp_hooks_list;
+  auto &list = get_autograd_meta()->cpp_hooks_list_;
   if(!list) {
     create_cpp_hook();
   }
-  unsigned idx = list->size();
+  unsigned idx = list->hooks_list_.size();
   // Return the grad argument in case of a hook with void return type to have an
   // std::function with Variable return type
   std::function<void(Variable)> fn(hook);
-  list->emplace_back([fn](Variable grad){
+  list->hooks_list_.emplace_back([fn](Variable grad){
    fn(grad);
     return Variable();});
   return idx;
@@ -722,12 +722,12 @@ template <typename T>
 auto Variable::register_hook(T&& hook) -> Variable::hook_return_var_t<T> {
   TORCH_CHECK(requires_grad(), "cannot register a hook on a variable that "
                            "doesn't require gradient");
-  auto &list = get_autograd_meta()->cpp_hooks_list;
+  auto &list = get_autograd_meta()->cpp_hooks_list_;
   if(!list) {
     create_cpp_hook();
   }
-  unsigned idx = list->size();
-  list->push_back(hook);
+  unsigned idx = list->hooks_list_.size();
+  list->hooks_list_.push_back(hook);
   return idx;
 }
 
