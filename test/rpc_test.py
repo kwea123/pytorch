@@ -255,6 +255,8 @@ class RpcTest(object):
             self_rank=self.rank,
             init_method=self.init_method,
         )
+        # Wait for all init to complete.
+        dist.barrier()
         with self.assertRaisesRegex(RuntimeError, "is already initialized"):
             rpc.init_model_parallel(
                 self_name="worker{}".format(self.rank),
